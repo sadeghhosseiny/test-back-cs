@@ -6,7 +6,7 @@ using UsersApi.Services;
 namespace UsersApi.Controllers;
 
 [ApiController]
-[Route("users")]
+[Route("[controller]")]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -19,51 +19,46 @@ public class UsersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<User>>> GetAll()
     {
-        return await _userService.GetAllAsync();
+        var users = await _userService.GetAllAsync();
+        return Ok(users);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<User>> GetById(int id)
+    public async Task<ActionResult<UserResponse>> GetById(int id)
     {
         var user = await _userService.GetByIdAsync(id);
+        if (user == null) return NotFound();
 
-        if (user is null)
-        {
-            return NotFound();
-        }
-
-        return user;
+        return Ok(user);
     }
 
     [HttpPost]
-    public async Task<ActionResult<User>> Create(CreateUserRequest request)
+    public async Task<ActionResult<User>> Create([FromBody] CreateUserRequest request)
     {
-        var user = await _userService.CreateAsync(request.Name, request.Role!.Value);
-        return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+        var user = new User
+        {
+            Name = request.Name,
+            Role = request.Role ?? Role.User
+        };
+
+        var createdUser = await _userService.CreateAsync(user);
+        return CreatedAtAction(nameof(GetById), new { id = createdUser.Id }, createdUser);
     }
 
-    [HttpPatch("{id}")]
-    public async Task<ActionResult<User>> Update(int id, UpdateUserRequest request)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateUserRequest request)
     {
-        var user = await _userService.UpdateAsync(id, request.Name, request.Role);
+        var success = await _userService.UpdateAsync(id, request);
+        if (!success) return NotFound();
 
-        if (user is null)
-        {
-            return NotFound();
-        }
-
-        return user;
+        return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var deleted = await _userService.DeleteAsync(id);
-
-        if (!deleted)
-        {
-            return NotFound();
-        }
+        var success = await _userService.DeleteAsync(id);
+        if (!success) return NotFound();
 
         return NoContent();
     }

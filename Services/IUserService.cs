@@ -1,3 +1,4 @@
+using UsersApi.Dtos;
 using UsersApi.Models;
 
 namespace UsersApi.Services;
@@ -5,8 +6,8 @@ namespace UsersApi.Services;
 public interface IUserService
 {
     Task<List<User>> GetAllAsync();
-    Task<User?> GetByIdAsync(int id);
-    Task<User> CreateAsync(string name, Role role);
-    Task<User?> UpdateAsync(int id, string? name, Role? role);
+    Task<UserResponse?> GetByIdAsync(int id);
+    Task<User> CreateAsync(User user);
+    Task<bool> UpdateAsync(int id, UpdateUserRequest request);
     Task<bool> DeleteAsync(int id);
 }
