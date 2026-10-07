@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using UsersApi.Data;
+using UsersApi.Dtos;
 using UsersApi.Models;
+using UsersApi.Exceptions;
 
 namespace UsersApi.Services;
 
@@ -32,5 +34,20 @@ public class PostService : IPostService
         _db.Posts.Add(post);
         await _db.SaveChangesAsync();
         return post;
+    }
+
+    public async Task<bool> UpdateAsync(int id, UpdatePostRequest request)
+    {
+        var post = await _db.Posts.FindAsync(id);
+        if (post is null)
+        {
+            throw new NotFoundException($"کاربری با شناسه {id} پیدا نشد.");
+        }
+
+        post.Title = request.Title;
+        post.Content = request.Content;
+
+        await _db.SaveChangesAsync();
+        return true;
     }
 }

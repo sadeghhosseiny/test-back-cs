@@ -28,4 +28,13 @@ public class PostsController : ControllerBase
 
         return Created($"/posts/{post.Id}", post);
     }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<Post>> UpdatePost(int id, [FromBody] UpdatePostRequest request)
+    {
+        var success = await _postService.UpdateAsync(id, request);
+        if (!success) return NotFound();
+
+        return NoContent();
+    }
 }
