@@ -50,4 +50,14 @@ public class PostService : IPostService
         await _db.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> DeletePostAsync(int id)
+    {
+        var post = await _db.Posts.FindAsync(id);
+        if (post == null) return false;
+
+        _db.Posts.Remove(post);
+        await _db.SaveChangesAsync();
+        return true;
+    }
 }

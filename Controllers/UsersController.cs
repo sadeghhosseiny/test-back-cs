@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using UsersApi.Dtos;
 using UsersApi.Models;
 using UsersApi.Services;
-using UsersApi.Exceptions;
 
 namespace UsersApi.Controllers;
 
@@ -18,10 +17,14 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<User>>> GetAll()
+    public async Task<ActionResult<List<UserResponse>>> GetAll(
+        [FromQuery] int pageNumber = 1, 
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? searchName = null,
+        [FromQuery] Role? role = null
+        )
     {
-        var users = await _userService.GetAllAsync();
-        
+        var users = await _userService.GetAllAsync(pageNumber, pageSize, searchName, role);
         return Ok(users);
     }
 
@@ -29,10 +32,6 @@ public class UsersController : ControllerBase
     public async Task<ActionResult<UserResponse>> GetById(int id)
     {
         var user = await _userService.GetByIdAsync(id);
-        if (user == null)
-        {
-            throw new NotFoundException($"کاربری با شناسه {id} پیدا نشد.");
-        }
 
         return Ok(user);
     }

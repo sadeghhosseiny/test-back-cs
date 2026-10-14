@@ -37,4 +37,13 @@ public class PostsController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var success = await _postService.DeletePostAsync(id);
+        if (!success) return NotFound();
+
+        return NoContent();
+    }
 }

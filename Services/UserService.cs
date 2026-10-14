@@ -15,9 +15,31 @@ public class UserService : IUserService
         _db = db;
     }
 
-    public async Task<List<User>> GetAllAsync()
+    public async Task<List<UserResponse>> GetAllAsync(int pageNumber, int pageSize, string? searchName, Role? role)
     {
-        return await _db.Users.ToListAsync();
+        var query = _db.Users.Include(u => u.Posts).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchName))
+        {
+            query = query.Where(u => u.Name.Contains(searchName));
+        }
+
+        if (role.HasValue)
+        {
+            query = query.Where(u => u.Role == role.Value);
+        }
+
+        var users = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return users.Select(u => new UserResponse(
+            u.Id,
+            u.Name,
+            u.Role.ToString(),
+            u.Posts.Select(p => new PostResponse(p.Id, p.Title, p.Content, p.CreatedAt)).ToList()
+        )).ToList();
     }
 
     public async Task<UserResponse?> GetByIdAsync(int id)
@@ -26,7 +48,7 @@ public class UserService : IUserService
             .Include(u => u.Posts)
             .FirstOrDefaultAsync(u => u.Id == id);
 
-        if (user == null) return null;
+        if (user == null) throw new KeyNotFoundException("User with this ID was not found.");
 
         return new UserResponse(
             user.Id,

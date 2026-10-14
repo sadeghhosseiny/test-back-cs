@@ -5,7 +5,7 @@ namespace UsersApi.Services;
 
 public interface IUserService
 {
-    Task<List<User>> GetAllAsync();
+    Task<List<UserResponse>> GetAllAsync(int pageNumber, int pageSize, string? searchName, Role? role);
     Task<UserResponse?> GetByIdAsync(int id);
     Task<User> CreateAsync(User user);
     Task<bool> UpdateAsync(int id, UpdateUserRequest request);
