@@ -75,6 +75,11 @@ namespace UsersApi.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("name");
 
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("phone_number");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(20)
